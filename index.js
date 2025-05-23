@@ -32,7 +32,7 @@ async function sendFilm(ctx, film, part) {
     const sent = await ctx.telegram.copyMessage(chatId, CHANNEL_ID, msgId);
     const parts = Object.keys(films[film]).filter(p => p !== part);
     const buttons = parts.map(p => Markup.button.callback(p, `${film}_${p}`));
-    const btnMsg = parts.length ? await ctx.reply("🔵 Filmning qolgan qismlari: ", Markup.inlineKeyboard([buttons])) : null;
+    const btnMsg = parts.length ? await ctx.reply("    Qolgan qismlar:     ", Markup.inlineKeyboard([buttons])) : null;
 
     userLast[chatId] = { msg: sent.message_id, btn: btnMsg?.message_id || null };
   } catch {
