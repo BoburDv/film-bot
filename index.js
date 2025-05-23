@@ -4,7 +4,7 @@ const { Telegraf, Markup } = require("telegraf");
 const films = require("./data-movie");
 
 const BOT_TOKEN = "8068690808:AAFdXLwKPsDg5ZZIt4FrOoT010ZFS8geSZk";
-const CHANNEL_ID = "@MovelyUz";
+const CHANNEL_ID = "https://t.me/+8rB7LSPLlKUwZmNi";
 const ADMIN_ID = 7676273635;
 const bot = new Telegraf(BOT_TOKEN);
 
