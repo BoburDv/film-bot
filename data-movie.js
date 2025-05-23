@@ -9,7 +9,9 @@ const films = {
     7: 28,
     8: 29,
   },
-  asalarich: {},
+  asalarich: {
+    1: 30,
+  },
 };
 
 module.exports = films;

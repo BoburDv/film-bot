@@ -3,7 +3,7 @@
 const { Telegraf, Markup } = require("telegraf");
 const films = require("./data-movie");
 
-const BOT_TOKEN = "8163392842:AAFUzbf7Otek5uFk8i4wiPu2YtpgFDQiLO4";
+const BOT_TOKEN = "8068690808:AAFdXLwKPsDg5ZZIt4FrOoT010ZFS8geSZk";
 const CHANNEL_ID = "@MovelyUz";
 const ADMIN_ID = 7676273635;
 const bot = new Telegraf(BOT_TOKEN);
@@ -32,7 +32,7 @@ async function sendFilm(ctx, film, part) {
     const sent = await ctx.telegram.copyMessage(chatId, CHANNEL_ID, msgId);
     const parts = Object.keys(films[film]).filter(p => p !== part);
     const buttons = parts.map(p => Markup.button.callback(p, `${film}_${p}`));
-    const btnMsg = parts.length ? await ctx.reply("    Qolgan qismlar:     ", Markup.inlineKeyboard([buttons])) : null;
+    const btnMsg = parts.length ? await ctx.reply("————— Qolgan — qismlar: —————", Markup.inlineKeyboard([buttons])) : null;
 
     userLast[chatId] = { msg: sent.message_id, btn: btnMsg?.message_id || null };
   } catch {
