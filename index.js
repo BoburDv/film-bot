@@ -3,8 +3,8 @@
 const { Telegraf, Markup } = require("telegraf");
 const films = require("./data-movie");
 
-const BOT_TOKEN = "8068690808:AAFdXLwKPsDg5ZZIt4FrOoT010ZFS8geSZk";
-const CHANNEL_ID = "https://t.me/+8rB7LSPLlKUwZmNi";
+const BOT_TOKEN = "8068690808:AAEUKMt4sZJCrkJ9IiT22uA0Cpzh6_515VU";
+const CHANNEL_ID = "-1002556318549";
 const ADMIN_ID = 7676273635;
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -65,6 +65,11 @@ bot.action(/(.+)_(\d+)/, async (ctx) => {
   await ctx.answerCbQuery();
   const [_, film, part] = ctx.match;
   await sendFilm(ctx, film, part);
+});
+
+
+bot.on("channel_post", (ctx) => {
+  console.log("Kanal ID:", ctx.chat.id);
 });
 
 bot.launch();
