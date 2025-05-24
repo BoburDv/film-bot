@@ -14,7 +14,7 @@ bot.start(async ctx => {
 bot.hears("🎬 Film buyurtma qilish", async ctx => {
   waiting[ctx.from.id] = true;
   state[ctx.from.id] = "waiting";
-  await ctx.reply("❕Iltimos film nomini yozib qoldiring ...", Markup.removeKeyboard());
+  await ctx.reply("❕Iltimos film nomini yozib qoldiring.", Markup.removeKeyboard());
 });
 
 bot.on("text", async ctx => {
@@ -48,7 +48,11 @@ bot.on("text", async ctx => {
     if (found) break;
   }
 
-  if (found) return sendFilm(ctx, found.f, found.p);
+  if (found) {
+    if (userLast[id]?.msg) await ctx.telegram.deleteMessage(id, userLast[id].msg).catch(() => {});
+    if (userLast[id]?.btn) await ctx.telegram.deleteMessage(id, userLast[id].btn).catch(() => {});
+    return sendFilm(ctx, found.f, found.p);
+  }
 
   try {
     await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL, +text);
@@ -66,7 +70,7 @@ bot.action("cancel_order", async ctx => {
   }
   state[id] = null;
   clearTimeout(timers[id]);
-  await ctx.reply("Buyurtma bekor qilindi ❌");
+  await ctx.reply("❌ Buyurtma bekor qilindi, 6 soatdan keyin yana yangi buyurtma berishingiz mumkin.");
   await ctx.answerCbQuery();
 });
 
@@ -82,9 +86,6 @@ async function sendFilm(ctx, f, p) {
   if (!msgId) return ctx.reply("Kechirasiz, texnik nosozlik ❌");
 
   try {
-    if (userLast[chatId]?.msg) await ctx.telegram.deleteMessage(chatId, userLast[chatId].msg).catch(() => {});
-    if (userLast[chatId]?.btn) await ctx.telegram.deleteMessage(chatId, userLast[chatId].btn).catch(() => {});
-
     const sent = await ctx.telegram.copyMessage(chatId, CHANNEL, msgId);
     const parts = Object.keys(films[f]).filter(x => x !== p);
     const buttons = parts.map(x => Markup.button.callback(x, `${f}_${x}`));
