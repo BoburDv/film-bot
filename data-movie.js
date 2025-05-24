@@ -19,7 +19,7 @@ const films = {
   Godzilla: {
     1: 33,
   },
-  Sonic: {
+  Sonik: {
     1: 36,
   },
   Maynkraft: {

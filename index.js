@@ -7,7 +7,10 @@ const userLast = {};
 
 bot.start(async ctx => {
   const name = ctx.from.first_name || "Foydalanuvchi";
-  await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`, Markup.keyboard([["🎬 Film buyurtma qilish"]]).resize());
+  await ctx.reply(
+    `Salom ${name}, film ID sini kiriting ✍`,
+    Markup.keyboard([["🎬 Film buyurtma qilish"]]).resize()
+  );
   await ctx.telegram.sendMessage(ADMIN, `Yangi foydalanuvchi++ ${name}`);
 });
 
@@ -19,7 +22,6 @@ bot.on("text", async ctx => {
   const id = ctx.from.id;
   const text = ctx.message.text.trim();
 
-  // Buyurtma qabul qilish (matn film nomidan farq qiladi)
   if (isNaN(text)) {
     const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
     await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma:\n${text}\n👤 ${user}`);
@@ -31,12 +33,10 @@ bot.on("text", async ctx => {
     return;
   }
 
-  // Film ID faqat raqam bo'lishi kerak
   if (!/^\d+$/.test(text)) {
     return ctx.reply("Faqat film ID sini kiriting ❗️");
   }
 
-  // Filmni qidirish
   let found = null;
   for (const f in films) {
     for (const p in films[f]) {
@@ -54,7 +54,6 @@ bot.on("text", async ctx => {
     return sendFilm(ctx, found.f, found.p);
   }
 
-  // Kanaldagi xabarni ko'chirish
   try {
     await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL, +text);
   } catch {
@@ -63,7 +62,7 @@ bot.on("text", async ctx => {
 });
 
 bot.action("cancel_order", async ctx => {
-  await ctx.reply("Buyurtma bekor qilindi ❌");
+  await ctx.reply("Buyurtma bekor qilindi ❌", Markup.keyboard([["🎬 Film buyurtma qilish"]]).resize());
   await ctx.answerCbQuery();
 });
 
