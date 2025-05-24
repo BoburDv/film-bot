@@ -1,7 +1,7 @@
 const { Telegraf, Markup } = require("telegraf");
 const films = require("./data-movie");
 
-const bot = new Telegraf("TOKEN");
+const bot = new Telegraf("8068690808:AAEUKMt4sZJCrkJ9IiT22uA0Cpzh6_515VU");
 const ADMIN = 7676273635, CHANNEL = "-1002556318549";
 const userLast = {}, waiting = {}, state = {}, timers = {};
 
