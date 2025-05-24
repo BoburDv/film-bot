@@ -32,7 +32,7 @@ bot.on("text", async ctx => {
       }
     });
     state[id] = { messageId: sentMsg.message_id };
-    timers[id] = setTimeout(() => { state[id] = null; }, 21600000);
+    timers[id] = setTimeout(() => { state[id] = null; }, 21600000); // 6 soat
     return;
   }
 
@@ -65,14 +65,8 @@ bot.action("cancel_order", async ctx => {
       await ctx.telegram.deleteMessage(ctx.chat.id, state[id].messageId);
     } catch {}
   }
-  if (userLast[id]?.btn) {
-    try {
-      await ctx.telegram.deleteMessage(ctx.chat.id, userLast[id].btn);
-    } catch {}
-  }
   state[id] = null;
   clearTimeout(timers[id]);
-  userLast[id] = {};
   await ctx.editMessageText("Buyurtma bekor qilindi ❌");
   await ctx.answerCbQuery();
 });
