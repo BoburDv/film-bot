@@ -51,14 +51,17 @@ bot.on("text", async ctx => {
     if (found) break;
   }
 
+  if (userLast[id]?.msg) await ctx.telegram.deleteMessage(id, userLast[id].msg).catch(() => {});
+  if (userLast[id]?.btn) await ctx.telegram.deleteMessage(id, userLast[id].btn).catch(() => {});
+  userLast[id] = {};
+
   if (found) {
-    if (userLast[id]?.msg) await ctx.telegram.deleteMessage(id, userLast[id].msg).catch(() => {});
-    if (userLast[id]?.btn) await ctx.telegram.deleteMessage(id, userLast[id].btn).catch(() => {});
     return sendFilm(ctx, found.f, found.p);
   }
 
   try {
-    await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL, +text);
+    const sent = await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL, +text);
+    userLast[id].msg = sent.message_id;
   } catch {
     await ctx.reply("Film topilmadi ❌");
   }
@@ -73,6 +76,7 @@ bot.action("cancel_order", async ctx => {
 bot.action(/(.+)_(\d+)/, async ctx => {
   await ctx.answerCbQuery();
   const [_, f, p] = ctx.match;
+  if (userLast[ctx.from.id]?.btn) await ctx.telegram.deleteMessage(ctx.chat.id, userLast[ctx.from.id].btn).catch(() => {});
   await sendFilm(ctx, f, p);
 });
 
