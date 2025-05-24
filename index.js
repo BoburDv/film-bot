@@ -67,9 +67,10 @@ bot.action("cancel_order", async ctx => {
   }
   state[id] = null;
   clearTimeout(timers[id]);
-  await ctx.editMessageText("Buyurtma bekor qilindi ❌");
+  await ctx.reply("Buyurtma bekor qilindi ❌");
   await ctx.answerCbQuery();
 });
+
 
 bot.action(/(.+)_(\d+)/, async ctx => {
   await ctx.answerCbQuery();
