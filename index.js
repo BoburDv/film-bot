@@ -12,20 +12,17 @@ bot.start(async ctx => {
 });
 
 bot.hears("🎬 Film buyurtma qilish", async ctx => {
-  waiting[ctx.from.id] = true; state[ctx.from.id] = "waiting";
-  await ctx.reply("❕ Iltimos film nomini yozib qoldiring", Markup.keyboard([["📩 Yuborish"]]).resize());
-});
-
-bot.hears("📩 Yuborish", async ctx => {
-  if (waiting[ctx.from.id]) {
-    // Tugmalarni yashirish
-    await ctx.reply("Iltimos, film nomini yozib yuboring.", Markup.removeKeyboard());
-  }
+  waiting[ctx.from.id] = true;
+  state[ctx.from.id] = "waiting";
+  await ctx.reply("❕ Iltimos film nomini yozib yuboring", Markup.removeKeyboard());
 });
 
 bot.on("text", async ctx => {
-  const id = ctx.from.id, text = ctx.message.text.trim();
-  if (waiting[id] && !["📩 Yuborish", "🎬 Film buyurtma qilish", "❌ Buyurtmani bekor qilish"].includes(text)) {
+  const id = ctx.from.id;
+  const text = ctx.message.text.trim();
+
+  if (waiting[id]) {
+    if (["🎬 Film buyurtma qilish", "❌ Buyurtmani bekor qilish"].includes(text)) return;
     waiting[id] = false;
     const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
     await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma:\n${text}\n👤 ${user}`);
@@ -38,17 +35,27 @@ bot.on("text", async ctx => {
     timers[id] = setTimeout(() => { state[id] = null; }, 21600000); // 6 soat
     return;
   }
+
   if (!/^\d+$/.test(text)) return ctx.reply("Faqat film ID sini kiriting ❗️");
+
   let found = null;
   for (const f in films) {
     for (const p in films[f]) {
-      if (films[f][p] === +text) { found = { f, p }; break; }
+      if (films[f][p] === +text) {
+        found = { f, p };
+        break;
+      }
     }
     if (found) break;
   }
+
   if (found) return sendFilm(ctx, found.f, found.p);
-  try { await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL, +text); }
-  catch { await ctx.reply("Film topilmadi. ❌"); }
+
+  try {
+    await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL, +text);
+  } catch {
+    await ctx.reply("Film topilmadi. ❌");
+  }
 });
 
 bot.action("cancel_order", async ctx => {
@@ -60,7 +67,7 @@ bot.action("cancel_order", async ctx => {
   }
   state[id] = null;
   clearTimeout(timers[id]);
-  await ctx.reply("Buyurtma bekor qilindi ❌");
+  await ctx.editMessageText("Buyurtma bekor qilindi ❌");
   await ctx.answerCbQuery();
 });
 
@@ -71,15 +78,21 @@ bot.action(/(.+)_(\d+)/, async ctx => {
 });
 
 async function sendFilm(ctx, f, p) {
-  const chatId = ctx.chat.id, msgId = films[f]?.[p];
+  const chatId = ctx.chat.id;
+  const msgId = films[f]?.[p];
   if (!msgId) return ctx.reply("Kechirasiz, texnik nosozlik ❌");
+
   try {
     if (userLast[chatId]?.msg) await ctx.telegram.deleteMessage(chatId, userLast[chatId].msg).catch(() => {});
     if (userLast[chatId]?.btn) await ctx.telegram.deleteMessage(chatId, userLast[chatId].btn).catch(() => {});
+
     const sent = await ctx.telegram.copyMessage(chatId, CHANNEL, msgId);
     const parts = Object.keys(films[f]).filter(x => x !== p);
     const buttons = parts.map(x => Markup.button.callback(x, `${f}_${x}`));
-    const btnMsg = parts.length ? await ctx.reply("————— Qolgan — qismlar —————", Markup.inlineKeyboard([buttons])) : null;
+    const btnMsg = parts.length
+      ? await ctx.reply("————— Qolgan — qismlar —————", Markup.inlineKeyboard([buttons]))
+      : null;
+
     userLast[chatId] = { msg: sent.message_id, btn: btnMsg?.message_id || null };
   } catch {
     await ctx.reply("Internet bilan aloqa uzildi ❌");
