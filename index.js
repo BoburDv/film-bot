@@ -24,7 +24,7 @@ bot.hears("🎬 Film buyurtma qilish", async (ctx) => {
   const userId = ctx.from.id;
   waitingReply[userId] = true;
   userState[userId] = "waiting";
-  await ctx.reply("Iltimos film nomini yozib qoldiring...",
+  await ctx.reply("❕ Iltimos film nomini yozib qoldiring ..."
     Markup.keyboard([["📩 Yuborish"]]).resize()
   );
 });
@@ -77,8 +77,9 @@ bot.on("text", async (ctx) => {
     waitingReply[userId] = false;
     userState[userId] = "sent";
 
-    await ctx.telegram.sendMessage(ADMIN_ID, `📥 Buyurtma:\n${text}\n👤 @${ctx.from.username || ctx.from.first_name}`);
-    await ctx.reply("Buyurtmangiz qabul qilindi ✅",
+    const username = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
+    await ctx.telegram.sendMessage(ADMIN_ID, `📥 Buyurtma:\n${text}\n👤 ${username}`);
+    await ctx.reply("Buyurtmangiz qabul qilindi! ✅",
       Markup.keyboard([["❌ Buyurtmani bekor qilish"]]).resize()
     );
     return;
