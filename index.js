@@ -3,7 +3,7 @@ const films = require("./data-movie");
 
 const bot = new Telegraf("8068690808:AAEUKMt4sZJCrkJ9IiT22uA0Cpzh6_515VU");
 const ADMIN = 7676273635, CHANNEL = "-1002556318549";
-const userLast = {}, waiting = {}, state = {};
+const userLast = {}, waiting = {}, state = {}, lastOrder = {};
 
 bot.start(async ctx => {
   const name = ctx.from.first_name || "Foydalanuvchi";
@@ -12,7 +12,13 @@ bot.start(async ctx => {
 });
 
 bot.hears("🎬 Film buyurtma qilish", async ctx => {
-  waiting[ctx.from.id] = true; state[ctx.from.id] = "waiting";
+  const id = ctx.from.id;
+  const now = Date.now();
+  if (lastOrder[id] && now - lastOrder[id] < 6*60*60*1000) {
+    const left = Math.ceil((6*60*60*1000 - (now - lastOrder[id])) / 60000);
+    return ctx.reply(`Yana buyurtma berish uchun ${left} daqiqa kuting.`);
+  }
+  waiting[id] = true; state[id] = "waiting";
   await ctx.reply("❕ Iltimos film nomini yozib qoldiring", Markup.keyboard([["📩 Yuborish"]]).resize());
 });
 
@@ -45,6 +51,7 @@ bot.on("text", async ctx => {
   const id = ctx.from.id, text = ctx.message.text.trim();
   if (waiting[id] && !["📩 Yuborish", "🎬 Film buyurtma qilish", "❌ Buyurtmani bekor qilish"].includes(text)) {
     waiting[id] = false; state[id] = "sent";
+    lastOrder[id] = Date.now();
     const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
     await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma:\n${text}\n👤 ${user}`);
     return ctx.reply("Buyurtmangiz qabul qilindi! ✅", Markup.keyboard([["❌ Buyurtmani bekor qilish"]]).resize());
