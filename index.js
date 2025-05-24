@@ -65,10 +65,13 @@ bot.action("cancel_order", async ctx => {
 bot.action(/(.+)_(\d+)/, async ctx => {
   await ctx.answerCbQuery();
   const [_, f, p] = ctx.match;
-  const old = userLast[ctx.from.id];
-  if (old?.btn) ctx.telegram.deleteMessage(ctx.chat.id, old.btn).catch(() => {});
+  const id = ctx.from.id;
+  const old = userLast[id];
+  if (old?.btn) ctx.telegram.deleteMessage(id, old.btn).catch(() => {});
+  if (old?.msg) ctx.telegram.deleteMessage(id, old.msg).catch(() => {});
   sendFilm(ctx, f, p);
 });
+
 
 async function sendFilm(ctx, f, p) {
   const id = ctx.chat.id, msgId = films[f]?.[p];
