@@ -4,6 +4,7 @@ const films = require("./data-movie");
 const bot = new Telegraf("8068690808:AAEUKMt4sZJCrkJ9IiT22uA0Cpzh6_515VU");
 const ADMIN = 7676273635, CHANNEL = "-1002556318549";
 const userLast = {};
+const waitOrder = {};
 
 bot.start(async ctx => {
   const name = ctx.from.first_name || "Foydalanuvchi";
@@ -15,6 +16,7 @@ bot.start(async ctx => {
 });
 
 bot.hears("🎬 Film buyurtma qilish", async ctx => {
+  waitOrder[ctx.from.id] = true;
   await ctx.reply("❕Iltimos film nomini yozib qoldiring.", Markup.removeKeyboard());
 });
 
@@ -22,7 +24,8 @@ bot.on("text", async ctx => {
   const id = ctx.from.id;
   const text = ctx.message.text.trim();
 
-  if (isNaN(text)) {
+  if (waitOrder[id]) {
+    waitOrder[id] = false;
     const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
     await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma:\n${text}\n👤 ${user}`);
     await ctx.reply("Buyurtma qabul qilindi! ✅", {
@@ -62,6 +65,7 @@ bot.on("text", async ctx => {
 });
 
 bot.action("cancel_order", async ctx => {
+  delete waitOrder[ctx.from.id];
   await ctx.reply("Buyurtma bekor qilindi ❌", Markup.keyboard([["🎬 Film buyurtma qilish"]]).resize());
   await ctx.answerCbQuery();
 });
