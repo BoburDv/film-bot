@@ -72,9 +72,12 @@ bot.action(/(.+)_(\d+)/, async ctx => {
   sendFilm(ctx, f, p);
 });
 
-
 async function sendFilm(ctx, f, p) {
-  const id = ctx.chat.id, msgId = films[f]?.[p];
+  const id = ctx.chat.id;
+  if (userLast[id]?.msg) await ctx.telegram.deleteMessage(id, userLast[id].msg).catch(() => {});
+  if (userLast[id]?.btn) await ctx.telegram.deleteMessage(id, userLast[id].btn).catch(() => {});
+
+  const msgId = films[f]?.[p];
   if (!msgId) return ctx.reply("Kechirasiz, texnik nosozlik ❌");
 
   try {
