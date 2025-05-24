@@ -21,6 +21,9 @@ const films = {
   },
   Sonic: {
     1: 36,
+  },
+  Maynkraft: {
+    1: 37
   }
 };
 
