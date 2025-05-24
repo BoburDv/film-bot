@@ -3,7 +3,7 @@ const films = require("./data-movie");
 
 const bot = new Telegraf("8068690808:AAEUKMt4sZJCrkJ9IiT22uA0Cpzh6_515VU");
 const ADMIN = 7676273635, CHANNEL = "-1002556318549";
-const userLast = {}, waiting = {}, state = {}, timers = {};
+const userLast = {};
 
 bot.start(async ctx => {
   const name = ctx.from.first_name || "Foydalanuvchi";
@@ -12,8 +12,6 @@ bot.start(async ctx => {
 });
 
 bot.hears("🎬 Film buyurtma qilish", async ctx => {
-  waiting[ctx.from.id] = true;
-  state[ctx.from.id] = "waiting";
   await ctx.reply("❕Iltimos film nomini yozib qoldiring.", Markup.removeKeyboard());
 });
 
@@ -21,22 +19,24 @@ bot.on("text", async ctx => {
   const id = ctx.from.id;
   const text = ctx.message.text.trim();
 
-  if (waiting[id]) {
-    waiting[id] = false;
+  // Buyurtma qabul qilish (matn film nomidan farq qiladi)
+  if (isNaN(text)) {
     const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
     await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma:\n${text}\n👤 ${user}`);
-    const sentMsg = await ctx.reply("Buyurtmangiz qabul qilindi ✅", {
+    await ctx.reply("Buyurtma qabul qilindi! ✅", {
       reply_markup: {
-        inline_keyboard: [[{ text: "❌ Buyurtmani bekor qilish", callback_data: "cancel_order" }]]
+        inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_order" }]]
       }
     });
-    state[id] = { messageId: sentMsg.message_id };
-    timers[id] = setTimeout(() => { state[id] = null; }, 21600000); // 6 soat
     return;
   }
 
-  if (!/^\d+$/.test(text)) return ctx.reply("Faqat film ID sini kiriting ❗️");
+  // Film ID faqat raqam bo'lishi kerak
+  if (!/^\d+$/.test(text)) {
+    return ctx.reply("Faqat film ID sini kiriting ❗️");
+  }
 
+  // Filmni qidirish
   let found = null;
   for (const f in films) {
     for (const p in films[f]) {
@@ -54,23 +54,16 @@ bot.on("text", async ctx => {
     return sendFilm(ctx, found.f, found.p);
   }
 
+  // Kanaldagi xabarni ko'chirish
   try {
     await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL, +text);
   } catch {
-    await ctx.reply("Film topilmadi. ❌");
+    await ctx.reply("Film topilmadi ❌");
   }
 });
 
 bot.action("cancel_order", async ctx => {
-  const id = ctx.from.id;
-  if (state[id]?.messageId) {
-    try {
-      await ctx.telegram.deleteMessage(ctx.chat.id, state[id].messageId);
-    } catch {}
-  }
-  state[id] = null;
-  clearTimeout(timers[id]);
-  await ctx.reply("❌ Buyurtma bekor qilindi, 6 soatdan keyin yana yangi buyurtma berishingiz mumkin.");
+  await ctx.reply("Buyurtma bekor qilindi ❌");
   await ctx.answerCbQuery();
 });
 
