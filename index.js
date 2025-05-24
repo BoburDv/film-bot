@@ -1,5 +1,3 @@
-// pm2 restart index.js
-
 const { Telegraf, Markup } = require("telegraf");
 const films = require("./data-movie");
 
@@ -9,10 +7,13 @@ const ADMIN_ID = 7676273635;
 const bot = new Telegraf(BOT_TOKEN);
 
 const userLast = {};
+const userRequests = {};
 
 bot.start(async (ctx) => {
   const name = ctx.from.first_name || "Foydalanuvchi";
-  await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`);
+  await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`, Markup.inlineKeyboard([
+    Markup.button.callback("🎬 Film buyurtma qilish", "order_film")
+  ]));
   await ctx.telegram.sendMessage(ADMIN_ID, `Yangi foydalanuvchi++ ${name}`);
 });
 
@@ -41,6 +42,15 @@ async function sendFilm(ctx, film, part) {
 }
 
 bot.on("text", async (ctx) => {
+  const userId = ctx.from.id;
+
+  if (userRequests[userId] === false) {
+    userRequests[userId] = true;
+    const userMsg = ctx.message.text;
+    await ctx.telegram.sendMessage(ADMIN_ID, `Yangi buyurtma: ${userMsg} (foydalanuvchi: ${ctx.from.username || ctx.from.first_name})`);
+    return ctx.reply("Sorovingiz qabul qilindi. Rahmat!");
+  }
+
   const text = ctx.message.text.trim();
   const id = parseInt(text);
   if (!/^\d+$/.test(text)) return ctx.reply("Faqat film ID sini kiriting ❗️");
@@ -65,6 +75,17 @@ bot.action(/(.+)_(\d+)/, async (ctx) => {
   await ctx.answerCbQuery();
   const [_, film, part] = ctx.match;
   await sendFilm(ctx, film, part);
+});
+
+bot.action("order_film", async (ctx) => {
+  const userId = ctx.from.id;
+  if (userRequests[userId]) {
+    await ctx.answerCbQuery("Siz allaqachon so'rov yubordingiz.");
+    return;
+  }
+  await ctx.answerCbQuery();
+  await ctx.reply("Iltimos, buyurtmangizni yozing:");
+  userRequests[userId] = false;
 });
 
 bot.launch();
