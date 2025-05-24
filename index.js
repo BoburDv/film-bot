@@ -12,18 +12,7 @@ const userLast = {};
 
 bot.start(async (ctx) => {
   const name = ctx.from.first_name || "Foydalanuvchi";
-  await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`, {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "📷 Instagram sahifa",
-            url: "https://www.instagram.com/MovelyUz/?utm_source=qr&r=nametag"
-          }
-        ]
-      ]
-    }
-  });
+  await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`);
   await ctx.telegram.sendMessage(ADMIN_ID, `Yangi foydalanuvchi++ ${name}`);
 });
 
