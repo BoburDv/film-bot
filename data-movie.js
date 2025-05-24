@@ -13,8 +13,8 @@ const films = {
     1: 30,
   },
   OrgimchaOdam: {
-    1: 31,
-    2: 32,
+    1: 32,
+    2: 31,
   },
   Godzilla: {
     1: 33,
