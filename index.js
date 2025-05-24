@@ -7,12 +7,12 @@ const ADMIN_ID = 7676273635;
 const bot = new Telegraf(BOT_TOKEN);
 
 const userLast = {};
-const userRequests = {};
+const waitingOrders = {};
 
 bot.start(async (ctx) => {
   const name = ctx.from.first_name || "Foydalanuvchi";
   await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`, Markup.inlineKeyboard([
-    Markup.button.callback("🎬 Film buyurtma qilish", "order_film")
+    Markup.button.callback("🎬 Film buyurtma qilish", "order_start")
   ]));
   await ctx.telegram.sendMessage(ADMIN_ID, `Yangi foydalanuvchi++ ${name}`);
 });
@@ -41,14 +41,21 @@ async function sendFilm(ctx, film, part) {
   }
 }
 
+bot.action("order_start", async (ctx) => {
+  const userId = ctx.from.id;
+  waitingOrders[userId] = true;
+  await ctx.answerCbQuery();
+  await ctx.reply("Iltimos, film nomini yozib qoldiring...");
+});
+
 bot.on("text", async (ctx) => {
   const userId = ctx.from.id;
 
-  if (userRequests[userId] === false) {
-    userRequests[userId] = true;
-    const userMsg = ctx.message.text;
-    await ctx.telegram.sendMessage(ADMIN_ID, `Yangi buyurtma: ${userMsg} (foydalanuvchi: ${ctx.from.username || ctx.from.first_name})`);
-    return ctx.reply("Sorovingiz qabul qilindi. Rahmat!");
+  if (waitingOrders[userId]) {
+    const msg = ctx.message.text;
+    waitingOrders[userId] = false;
+    await ctx.telegram.sendMessage(ADMIN_ID, `Yangi film buyurtmasi:\n\n${msg}\n\nFoydalanuvchi: @${ctx.from.username || ctx.from.first_name}`);
+    return ctx.reply("Buyurtmangiz qabul qilindi.");
   }
 
   const text = ctx.message.text.trim();
@@ -75,17 +82,6 @@ bot.action(/(.+)_(\d+)/, async (ctx) => {
   await ctx.answerCbQuery();
   const [_, film, part] = ctx.match;
   await sendFilm(ctx, film, part);
-});
-
-bot.action("order_film", async (ctx) => {
-  const userId = ctx.from.id;
-  if (userRequests[userId]) {
-    await ctx.answerCbQuery("Siz allaqachon so'rov yubordingiz.");
-    return;
-  }
-  await ctx.answerCbQuery();
-  await ctx.reply("Iltimos, buyurtmangizni yozing:");
-  userRequests[userId] = false;
 });
 
 bot.launch();
