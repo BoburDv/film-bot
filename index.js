@@ -14,10 +14,15 @@ bot.start(async (ctx) => {
   const name = ctx.from.first_name || "Foydalanuvchi";
   await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`, {
     reply_markup: {
-      keyboard: [["📥 Film ID yuborish"]],
-      resize_keyboard: true,
-      one_time_keyboard: false,
-    },
+      inline_keyboard: [
+        [
+          {
+            text: "📷 Instagram sahifa",
+            url: "https://www.instagram.com/MovelyUz/?utm_source=qr&r=nametag"
+          }
+        ]
+      ]
+    }
   });
   await ctx.telegram.sendMessage(ADMIN_ID, `Yangi foydalanuvchi++ ${name}`);
 });
@@ -29,30 +34,18 @@ async function sendFilm(ctx, film, part) {
 
   try {
     if (userLast[chatId]?.msg) {
-      try {
-        await ctx.telegram.deleteMessage(chatId, userLast[chatId].msg);
-      } catch {}
+      try { await ctx.telegram.deleteMessage(chatId, userLast[chatId].msg); } catch {}
     }
     if (userLast[chatId]?.btn) {
-      try {
-        await ctx.telegram.deleteMessage(chatId, userLast[chatId].btn);
-      } catch {}
+      try { await ctx.telegram.deleteMessage(chatId, userLast[chatId].btn); } catch {}
     }
 
     const sent = await ctx.telegram.copyMessage(chatId, CHANNEL_ID, msgId);
-    const parts = Object.keys(films[film]).filter((p) => p !== part);
-    const buttons = parts.map((p) => Markup.button.callback(p, `${film}_${p}`));
-    const btnMsg = parts.length
-      ? await ctx.reply(
-          "————— Qolgan — qismlar —————",
-          Markup.inlineKeyboard([buttons])
-        )
-      : null;
+    const parts = Object.keys(films[film]).filter(p => p !== part);
+    const buttons = parts.map(p => Markup.button.callback(p, `${film}_${p}`));
+    const btnMsg = parts.length ? await ctx.reply("————— Qolgan — qismlar —————", Markup.inlineKeyboard([buttons])) : null;
 
-    userLast[chatId] = {
-      msg: sent.message_id,
-      btn: btnMsg?.message_id || null,
-    };
+    userLast[chatId] = { msg: sent.message_id, btn: btnMsg?.message_id || null };
   } catch {
     await ctx.reply("Internet bilan aloqa uzildi ❌");
   }
@@ -75,11 +68,8 @@ bot.on("text", async (ctx) => {
   }
 
   if (found) return sendFilm(ctx, found.f, found.p);
-  try {
-    await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL_ID, id);
-  } catch {
-    await ctx.reply("Film topilmadi. ❌");
-  }
+  try { await ctx.telegram.copyMessage(ctx.chat.id, CHANNEL_ID, id); }
+  catch { await ctx.reply("Film topilmadi. ❌"); }
 });
 
 bot.action(/(.+)_(\d+)/, async (ctx) => {
