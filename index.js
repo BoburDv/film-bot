@@ -13,7 +13,7 @@ bot.start(async ctx => {
 
 bot.hears("🎬 Film buyurtma qilish", async ctx => {
   waitOrder[ctx.from.id] = true;
-  await ctx.reply("❕(Iltimos avval siz izlagan film bizda bor yoki yo'qligini tekshiring) Yangi film nomini yozib qoldiring✍", Markup.removeKeyboard());
+  await ctx.reply("❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴 | Yangi film nomini yozib qoldiring ✍", Markup.removeKeyboard());
 });
 
 bot.on("text", async ctx => {
