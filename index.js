@@ -23,13 +23,12 @@ bot.hears("🎁 Referal", async ctx => {
 bot.hears("🎬 Buyurtma qilish", async ctx => {
   waitOrder[ctx.from.id] = true;
   await ctx.reply(
-    "❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴\nBu yerga yangi film nomini yozib qoldiring ✍",
+    "❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴.\nYangi film nomini yozib qoldiring ✍",
     Markup.inlineKeyboard([
       [{ text: "🔙 Ortga qaytish", callback_data: "go_back" }]
     ])
   );
 });
-
 
 bot.on("text", async ctx => {
   const id = ctx.from.id, text = ctx.message.text.trim();
@@ -37,7 +36,7 @@ bot.on("text", async ctx => {
   if (waitOrder[id]) {
     waitOrder[id] = false;
     const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
-    await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma:${text}\n👤 Buyurtmachi: ${user}`);
+    await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma: ${text}\n\n👤 Buyurtmachi: ${user}`);
     return ctx.reply("Buyurtma qabul qilindi! ✅", {
       reply_markup: { inline_keyboard: [[{ text: "❌ Bekor qilish", callback_data: "cancel_order" }]] }
     });
@@ -74,6 +73,18 @@ bot.on("text", async ctx => {
 bot.action("cancel_order", async ctx => {
   delete waitOrder[ctx.from.id];
   await ctx.reply("Buyurtma bekor qilindi! ✅", Markup.keyboard([["🎬 Buyurtma qilish"]]).resize());
+  await ctx.answerCbQuery();
+});
+
+bot.action("go_back", async ctx => {
+  delete waitOrder[ctx.from.id];
+  await ctx.editMessageReplyMarkup();
+  await ctx.reply(
+    "Bosh menuga qaytdingiz! ✅",
+    Markup.keyboard([
+      ["🎬 Buyurtma qilish", "🎁 Referal"]
+    ]).resize()
+  );
   await ctx.answerCbQuery();
 });
 
