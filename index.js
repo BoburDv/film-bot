@@ -86,9 +86,7 @@ bot.action("go_back", async ctx => {
     await ctx.telegram.deleteMessage(ctx.from.id, userLast[ctx.from.id].specialMsg).catch(() => {});
     delete userLast[ctx.from.id].specialMsg;
   }
-
   await ctx.answerCbQuery();
-  await ctx.editMessageReplyMarkup();
   await ctx.reply(
     "Bosh menuga qaytdingiz! ✅",
     Markup.keyboard([
@@ -96,6 +94,7 @@ bot.action("go_back", async ctx => {
     ]).resize()
   );
 });
+
 
 
 bot.action(/(.+)_(\d+)/, async ctx => {
