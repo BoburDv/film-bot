@@ -87,6 +87,7 @@ bot.action("go_back", async ctx => {
     delete userLast[ctx.from.id].specialMsg;
   }
 
+  await ctx.answerCbQuery();
   await ctx.editMessageReplyMarkup();
   await ctx.reply(
     "Bosh menuga qaytdingiz! ✅",
@@ -94,8 +95,8 @@ bot.action("go_back", async ctx => {
       ["🎬 Buyurtma qilish", "🎁 Referal"]
     ]).resize()
   );
-  await ctx.answerCbQuery();
 });
+
 
 bot.action(/(.+)_(\d+)/, async ctx => {
   await ctx.answerCbQuery();
