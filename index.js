@@ -23,12 +23,14 @@ bot.hears("🎁 Referal", async ctx => {
 
 bot.hears("🎬 Buyurtma qilish", async ctx => {
   waitOrder[ctx.from.id] = true;
-  await ctx.reply(
+  const msg = await ctx.reply(
     "❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴.\nYangi film nomini yozib qoldiring ✍",
     Markup.inlineKeyboard([
       [{ text: "🔙 Ortga qaytish", callback_data: "go_back" }]
     ])
   );
+  userLast[ctx.from.id] = userLast[ctx.from.id] || {};
+  userLast[ctx.from.id].specialMsg = msg.message_id;
 });
 
 bot.on("text", async ctx => {
@@ -79,9 +81,12 @@ bot.action("cancel_order", async ctx => {
 
 bot.action("go_back", async ctx => {
   delete waitOrder[ctx.from.id];
-  if (userLast[ctx.from.id]?.msg) await ctx.telegram.deleteMessage(ctx.from.id, userLast[ctx.from.id].msg).catch(() => {});
-  if (userLast[ctx.from.id]?.btn) await ctx.telegram.deleteMessage(ctx.from.id, userLast[ctx.from.id].btn).catch(() => {});
-  userLast[ctx.from.id] = {};
+
+  if (userLast[ctx.from.id]?.specialMsg) {
+    await ctx.telegram.deleteMessage(ctx.from.id, userLast[ctx.from.id].specialMsg).catch(() => {});
+    delete userLast[ctx.from.id].specialMsg;
+  }
+
   await ctx.editMessageReplyMarkup();
   await ctx.reply(
     "Bosh menuga qaytdingiz! ✅",
