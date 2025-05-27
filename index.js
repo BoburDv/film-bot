@@ -3,7 +3,7 @@ const films = require("./data-movie");
 
 const bot = new Telegraf("8068690808:AAEUKMt4sZJCrkJ9IiT22uA0Cpzh6_515VU");
 const ADMIN = 7676273635, CHANNEL = "-1002556318549";
-const userLast = {}, waitOrder = {};
+const userLast = {}, waitOrder = {}, orderAccepted = {};
 
 bot.start(async ctx => {
   const name = ctx.from.first_name || "Foydalanuvchi";
@@ -34,7 +34,11 @@ bot.on("text", async ctx => {
   const id = ctx.from.id, text = ctx.message.text.trim();
 
   if (waitOrder[id]) {
+    if(orderAccepted[id]){
+      await ctx.reply("Oldingi buyurtmangiz qabul qilingan! ❗");
+    }
     waitOrder[id] = false;
+    orderAccepted[id] = true;
     const user = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
     await ctx.telegram.sendMessage(ADMIN, `📥 Buyurtma: ${text}\n\n👤 Buyurtmachi: ${user}`);
     return ctx.reply("Buyurtma qabul qilindi! ✅", {
@@ -72,7 +76,10 @@ bot.on("text", async ctx => {
 
 bot.action("cancel_order", async ctx => {
   delete waitOrder[ctx.from.id];
-  await ctx.reply("Buyurtma bekor qilindi! ✅", Markup.keyboard([["🎬 Buyurtma qilish"]]).resize());
+  delete orderAccepted[ctx.from.id];
+  await ctx.reply("Buyurtma bekor qilindi! ✅", Markup.keyboard([
+    ["🎬 Buyurtma qilish", "🎁 Referal"]
+  ]).resize());
   await ctx.answerCbQuery();
 });
 
