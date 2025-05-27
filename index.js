@@ -7,8 +7,17 @@ const userLast = {}, waitOrder = {};
 
 bot.start(async ctx => {
   const name = ctx.from.first_name || "Foydalanuvchi";
-  await ctx.reply(`Salom ${name}, film ID sini kiriting ✍`, Markup.keyboard([["🎬 Film buyurtma qilish"]]).resize());
+  await ctx.reply(
+    `Salom ${name}, film ID sini kiriting ✍`,
+    Markup.keyboard([
+      ["🎬 Buyurtma qilish", "🎁 Referal"]
+    ]).resize()
+  );
   await ctx.telegram.sendMessage(ADMIN, `Yangi foydalanuvchi++ ${name}`);
+});
+
+bot.hears("🎁 Referal", async ctx => {
+  await ctx.reply("🔥Tez kunda.!!!");
 });
 
 bot.hears("🎬 Film buyurtma qilish", async ctx => {

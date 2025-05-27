@@ -24,7 +24,10 @@ const films = {
   },
   Maynkraft: {
     1: 39
-  }
+  },
+  Qasoskorlar: {
+    1: 45
+  },
 };
 
 module.exports = films;
