@@ -75,7 +75,12 @@ bot.on("text", async ctx => {
 
 bot.action("cancel_order", async ctx => {
   delete waitOrder[ctx.from.id];
-  await ctx.reply("Buyurtma bekor qilindi! ✅", Markup.keyboard([["🎬 Buyurtma qilish", "🎁 Referal"]]).resize());
+  await ctx.deleteMessage().catch(() => {});
+
+  await ctx.reply(
+    "Buyurtma bekor qilindi! ✅",
+    Markup.keyboard([["🎬 Buyurtma qilish", "🎁 Referal"]]).resize()
+  );
   await ctx.answerCbQuery();
 });
 
