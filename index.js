@@ -6,7 +6,8 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMIN = 7676273635,
   CHANNEL = "-1002556318549";
 const userLast = {},
-  waitOrder = {};
+  waitOrder = {},
+  orderTime = {};
 
 const mainKeyboard = Markup.keyboard([
   ["🎬 Buyurtma qilish", "🎁 Referal"],
@@ -15,18 +16,18 @@ const mainKeyboard = Markup.keyboard([
 bot.start(async (ctx) => {
   const name = ctx.from.first_name || "Foydalanuvchi";
   await ctx.reply(
-    `🔥 𝗦𝗮𝗹𝗼𝗺 ${name}, @movely_bot 𝗴𝗮 𝗫𝘂𝘀𝗵 𝗸𝗲𝗹𝗶𝗯𝘀𝗶𝘇! \𝗻😎 𝗠𝗲𝗻𝗴𝗮 𝗳𝗶𝗹𝗺 𝗜𝗗 𝘀𝗶𝗻𝗶 𝘆𝘂𝗯𝗼𝗿𝗶𝗻𝗴.`,
+    `Salom ${name}, @movely_bot ga xush kelibsiz! Film ID sini yuboring. 🚀`,
     mainKeyboard
   );
   await ctx.telegram.sendMessage(ADMIN, `Yangi foydalanuvchi++ ${name}`);
 });
 
-bot.hears("🎁 Referal", (ctx) => ctx.reply("🔥(Tez kunda...)"));
+bot.hears("🎁 Referal", (ctx) => ctx.reply("🔥Tez kunda..."));
 
 bot.hears("🎬 Buyurtma qilish", async (ctx) => {
   waitOrder[ctx.from.id] = true;
   const msg = await ctx.reply(
-    "❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀, 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗯 𝗸𝗼'𝗿𝗶𝗻𝗴. \nYangi film nomini yozib qoldirishingiz mumkin ✍️",
+    "❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀, 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴. \n\n📝 Yangi film nomini yozib qoldirishingiz mumkin!",
     Markup.inlineKeyboard([
       [Markup.button.callback("🔙 Ortga qaytish", "go_back")],
     ])
@@ -40,23 +41,40 @@ bot.on("text", async (ctx) => {
 
   if (waitOrder[id]) {
     waitOrder[id] = false;
+    orderTime[id] = Date.now();
+
     const user = ctx.from.username
       ? `@${ctx.from.username}`
       : ctx.from.first_name;
+
+    if (userLast[id]?.specialMsg) {
+      await ctx.telegram
+        .editMessageReplyMarkup(id, userLast[id].specialMsg, null, null)
+        .catch(() => {});
+      delete userLast[id].specialMsg;
+    }
+
+    await ctx.reply("⏳", {
+      reply_markup: { remove_keyboard: true },
+    });
+
     await ctx.telegram.sendMessage(
       ADMIN,
-      `📥 Buyurtma: ${text}\n\n👤 Buyurtmachi: ${user}`
+      `📥 Buyurtma: ${text}\n\n👤 User: ${user}`
     );
-    return ctx.reply("Buyurtma qabul qilindi! ✅", {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: "❌ Bekor qilish", callback_data: "cancel_order" }],
-        ],
-      },
-    });
+
+    await ctx.reply(
+      "Buyurtma qabul qilindi ✅",
+      Markup.inlineKeyboard([
+        [Markup.button.callback("❌ Bekor qilish", "cancel_order")],
+      ])
+    );
+
+    return;
   }
 
-  if (!/^\d+$/.test(text)) return ctx.reply("Faqat film ID sini kiriting ❗️");
+  if (!/^\d+$/.test(text))
+    return ctx.reply("Faqat film ID raqamini kiriting ❗️");
 
   const old = userLast[id] || {};
   if (old.msg) ctx.telegram.deleteMessage(id, old.msg).catch(() => {});
@@ -85,7 +103,7 @@ bot.on("text", async (ctx) => {
 bot.action("cancel_order", async (ctx) => {
   delete waitOrder[ctx.from.id];
   await ctx.deleteMessage().catch(() => {});
-  await ctx.reply("Buyurtma bekor qilindi! ✅", mainKeyboard);
+  await ctx.reply("Buyurtma bekor qilindi ✅", mainKeyboard);
   await ctx.answerCbQuery();
 });
 
@@ -98,7 +116,7 @@ bot.action("go_back", async (ctx) => {
     delete userLast[ctx.from.id].specialMsg;
   }
   await ctx.answerCbQuery();
-  await ctx.reply("Bosh menuga qaytdingiz! ✅", mainKeyboard);
+  await ctx.reply("Bosh menuga qaytdingiz ✅", mainKeyboard);
 });
 
 bot.action(/(.+)_(\d+)/, async (ctx) => {
@@ -127,7 +145,7 @@ async function sendFilm(ctx, f, p) {
     const btns = parts.map((x) => Markup.button.callback(x, `${f}_${x}`));
     const btnMsg = parts.length
       ? await ctx.reply(
-          "————— Qolgan — qismlar —————",
+          "<<<< Davomiy qismlar mavjud >>>>",
           Markup.inlineKeyboard([btns])
         )
       : null;
