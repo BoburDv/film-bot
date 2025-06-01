@@ -47,7 +47,7 @@ bot.on("text", async (ctx) => {
       ADMIN,
       `📥 Buyurtma: ${text}\n\n👤 Buyurtmachi: ${user}`
     );
-    return ctx.reply("Buyurtma qabul qilindi! ✅", {
+    return ctx.reply("𝗕𝘂𝘆𝘂𝗿𝘁𝗺𝗮 𝗾𝗮𝗯𝘂𝗹 𝗾𝗶𝗹𝗶𝗻𝗱𝗶! ✅", {
       reply_markup: {
         inline_keyboard: [
           [{ text: "❌ Bekor qilish", callback_data: "cancel_order" }],
@@ -78,14 +78,14 @@ bot.on("text", async (ctx) => {
     const sent = await ctx.telegram.copyMessage(id, CHANNEL, +text);
     userLast[id].msg = sent.message_id;
   } catch {
-    await ctx.reply("Film topilmadi ❌");
+    await ctx.reply("𝗙𝗶𝗹𝗺 𝘁𝗼𝗽𝗶𝗹𝗺𝗮𝗱𝗶 ❌");
   }
 });
 
 bot.action("cancel_order", async (ctx) => {
   delete waitOrder[ctx.from.id];
   await ctx.deleteMessage().catch(() => {});
-  await ctx.reply("Buyurtma bekor qilindi! ✅", mainKeyboard);
+  await ctx.reply("𝗕𝘂𝘆𝘂𝗿𝘁𝗺𝗮 𝗯𝗲𝗸𝗼𝗿 𝗾𝗶𝗹𝗶𝗻𝗱𝗶! ✅", mainKeyboard);
   await ctx.answerCbQuery();
 });
 
@@ -98,7 +98,7 @@ bot.action("go_back", async (ctx) => {
     delete userLast[ctx.from.id].specialMsg;
   }
   await ctx.answerCbQuery();
-  await ctx.reply("Bosh menuga qaytdingiz! ✅", mainKeyboard);
+  await ctx.reply("𝗕𝗼𝘀𝗵 𝗺𝗲𝗻𝘂𝗴𝗮 𝗾𝗮𝘆𝘁𝗱𝗶𝗻𝗴𝗶𝘇! ✅", mainKeyboard);
 });
 
 bot.action(/(.+)_(\d+)/, async (ctx) => {
@@ -119,7 +119,7 @@ async function sendFilm(ctx, f, p) {
     await ctx.telegram.deleteMessage(id, userLast[id].btn).catch(() => {});
 
   const msgId = films[f]?.[p];
-  if (!msgId) return ctx.reply("Kechirasiz, texnik nosozlik ❌");
+  if (!msgId) return ctx.reply("𝗞𝗲𝗰𝗵𝗶𝗿𝗮𝘀𝗶𝘇, 𝘁𝗲𝘅𝗻𝗶𝗸 𝗻𝗼𝘀𝗼𝘇𝗹𝗶𝗸 ❌");
 
   try {
     const sent = await ctx.telegram.copyMessage(id, CHANNEL, msgId);
@@ -134,7 +134,7 @@ async function sendFilm(ctx, f, p) {
 
     userLast[id] = { msg: sent.message_id, btn: btnMsg?.message_id || null };
   } catch {
-    await ctx.reply("Internet bilan aloqa uzildi ❌");
+    await ctx.reply("𝗜𝗻𝘁𝗲𝗿𝗻𝗲𝘁 𝗯𝗶𝗹𝗮𝗻 𝗮𝗹𝗼𝗾𝗮 𝘂𝘇𝗶𝗹𝗱𝗶 ❌");
   }
 }
 
