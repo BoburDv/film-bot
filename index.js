@@ -15,7 +15,7 @@ const mainKeyboard = Markup.keyboard([
 bot.start(async (ctx) => {
   const name = ctx.from.first_name || "Foydalanuvchi";
   await ctx.reply(
-    `🔥 Salom ${name}, @movely_bot ga Xush kelibsiz! /n😎 Menga film ID sini yuboring.`,
+    `🔥 𝗦𝗮𝗹𝗼𝗺 ${name}, @movely_bot 𝗴𝗮 𝗫𝘂𝘀𝗵 𝗸𝗲𝗹𝗶𝗯𝘀𝗶𝘇! \𝗻😎 𝗠𝗲𝗻𝗴𝗮 𝗳𝗶𝗹𝗺 𝗜𝗗 𝘀𝗶𝗻𝗶 𝘆𝘂𝗯𝗼𝗿𝗶𝗻𝗴.`,
     mainKeyboard
   );
   await ctx.telegram.sendMessage(ADMIN, `Yangi foydalanuvchi++ ${name}`);
