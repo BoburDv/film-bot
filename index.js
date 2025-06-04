@@ -78,7 +78,6 @@ bot.on("text", async (ctx) => {
 
   const old = userLast[id] || {};
   if (old.msg) ctx.telegram.deleteMessage(id, old.msg).catch(() => {});
-  if (old.btn) ctx.telegram.deleteMessage(id, old.btn).catch(() => {});
   userLast[id] = {};
 
   let found;
@@ -119,41 +118,83 @@ bot.action("go_back", async (ctx) => {
   await ctx.reply("Bosh menuga qaytdingiz ✅", mainKeyboard);
 });
 
+bot.action(/nav_(.+)_(\d+)/, async (ctx) => {
+  await ctx.answerCbQuery();
+  const [_, f, page] = ctx.match;
+  const id = ctx.from.id;
+
+  const parts = Object.keys(films[f]);
+  const reply_markup = generateButtons(f, parts, +page);
+
+  if (userLast[id]?.msg) {
+    await ctx.telegram
+      .editMessageReplyMarkup(id, userLast[id].msg, null, reply_markup)
+      .catch(() => {});
+  }
+});
+
 bot.action(/(.+)_(\d+)/, async (ctx) => {
   await ctx.answerCbQuery();
   const [_, f, p] = ctx.match;
   const id = ctx.from.id;
-  const old = userLast[id] || {};
-  if (old.btn) ctx.telegram.deleteMessage(id, old.btn).catch(() => {});
-  if (old.msg) ctx.telegram.deleteMessage(id, old.msg).catch(() => {});
+
+  if (userLast[id]?.msg)
+    await ctx.telegram.deleteMessage(id, userLast[id].msg).catch(() => {});
+
   sendFilm(ctx, f, p);
 });
 
-async function sendFilm(ctx, f, p) {
+async function sendFilm(ctx, f, p, page = 1) {
   const id = ctx.chat.id;
-  if (userLast[id]?.msg)
-    await ctx.telegram.deleteMessage(id, userLast[id].msg).catch(() => {});
-  if (userLast[id]?.btn)
-    await ctx.telegram.deleteMessage(id, userLast[id].btn).catch(() => {});
-
   const msgId = films[f]?.[p];
   if (!msgId) return ctx.reply("Kechirasiz, texnik nosozlik ❌");
 
   try {
-    const sent = await ctx.telegram.copyMessage(id, CHANNEL, msgId);
-    const parts = Object.keys(films[f]).filter((x) => x !== p);
-    const btns = parts.map((x) => Markup.button.callback(x, `${f}_${x}`));
-    const btnMsg = parts.length
-      ? await ctx.reply(
-          "<<<< Davomiy qismlar mavjud >>>>",
-          Markup.inlineKeyboard([btns])
-        )
-      : null;
+    const parts = Object.keys(films[f]);
+    const reply_markup = generateButtons(f, parts, page, p);
 
-    userLast[id] = { msg: sent.message_id, btn: btnMsg?.message_id || null };
+    const isPartButton = /^\w+_\d+$/.test(ctx.callbackQuery?.data || "");
+    if (isPartButton && userLast[id]?.msg) {
+      await ctx.telegram.deleteMessage(id, userLast[id].msg).catch(() => {});
+    }
+
+    const sent = await ctx.telegram.copyMessage(id, CHANNEL, msgId, {
+      reply_markup,
+    });
+
+    userLast[id] = { msg: sent.message_id };
   } catch {
-    await ctx.reply("Internet bilan aloqa uzildi ❌");
+    await ctx.reply("Filmni yuborishda xatolik yuz berdi ❌");
   }
+}
+
+function generateButtons(f, parts, page = 1) {
+  const total = parts.length;
+  const perPage = page === 1 || page === Math.ceil(total / 2) ? 3 : 2;
+
+  const startIndex = page === 1 ? 0 : (page - 2) * 2 + 3;
+  const endIndex = Math.min(startIndex + perPage, total);
+  const sliced = parts.slice(startIndex, endIndex);
+
+  const row = sliced.map((x) =>
+    Markup.button.callback(`${x}-qism`, `${f}_${x}`)
+  );
+
+  const nav = [];
+  if (page > 1) nav.push(Markup.button.callback("◀️", `nav_${f}_${page - 1}`));
+  if (endIndex < total)
+    nav.push(Markup.button.callback("▶️", `nav_${f}_${page + 1}`));
+
+  const finalRow =
+    nav.length === 2
+      ? [nav[0], ...row, nav[1]]
+      : nav.length === 1
+      ? page === 1
+        ? [...row, nav[0]]
+        : [nav[0], ...row]
+      : row;
+
+  return Markup.inlineKeyboard([finalRow]).reply_markup;
 }
 
 bot.launch();
