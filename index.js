@@ -1,13 +1,54 @@
 require("dotenv").config();
+const fs = require("fs");
 const { Telegraf, Markup } = require("telegraf");
 const films = require("./data-movie");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMIN = 7676273635,
   CHANNEL = "-1002556318549";
+
 const userLast = {},
   waitOrder = {},
   orderTime = {};
+
+const DATA_PATH = "./referal.json";
+
+let userData = {};
+
+function loadUserData() {
+  try {
+    if (fs.existsSync(DATA_PATH)) {
+      userData = JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
+    }
+  } catch {
+    userData = {};
+  }
+}
+
+function saveUserData() {
+  const compactData = {};
+  for (const id in userData) {
+    const { balance = 0, referrals = 0, referredBy = null } = userData[id];
+    compactData[id] = { balance, referrals, referredBy };
+  }
+  try {
+    fs.writeFileSync(DATA_PATH, JSON.stringify(compactData, null, 2));
+  } catch (e) {
+    console.error("❌ JSON saqlashda xatolik:", e.message);
+  }
+}
+
+function isCircularReferral(newId, refId) {
+  let cur = refId;
+  while (cur) {
+    if (cur === String(newId)) return true;
+    const u = userData[cur];
+    cur = u ? u.referredBy : null;
+  }
+  return false;
+}
+
+loadUserData();
 
 const mainKeyboard = Markup.keyboard([
   ["🎬 Buyurtma qilish", "🎁 Referal"],
@@ -15,14 +56,76 @@ const mainKeyboard = Markup.keyboard([
 
 bot.start(async (ctx) => {
   const name = ctx.from.first_name || "Foydalanuvchi";
+  const userId = String(ctx.from.id);
+  const refId = ctx.startPayload || "";
+
+  if (!userData[userId]) {
+    userData[userId] = { balance: 0, referrals: 0, referredBy: null };
+  }
+
+  if (
+    refId &&
+    refId !== userId &&
+    /^[0-9]+$/.test(refId) &&
+    !userData[userId].referredBy &&
+    !isCircularReferral(userId, refId)
+  ) {
+    userData[userId].referredBy = refId;
+
+    if (!userData[refId]) {
+      userData[refId] = { balance: 0, referrals: 0, referredBy: null };
+    }
+
+    userData[refId].referrals += 1;
+    userData[refId].balance += 1000;
+
+    try {
+      await ctx.telegram.sendMessage(
+        refId,
+        `🎉 Sizga yangi referal qo‘shildi! Hozirgi takliflar soni: ${userData[refId].referrals}`
+      );
+    } catch {}
+
+    saveUserData();
+  }
+
   await ctx.reply(
-    `Salom ${name}, @movely_bot ga xush kelibsiz! — Film ID sini yuboring. 🚀`,
+    `Salom ${name}, @${ctx.botInfo.username} ga xush kelibsiz! — Film ID sini yuboring. 🚀`,
     mainKeyboard
   );
   await ctx.telegram.sendMessage(ADMIN, `Yangi foydalanuvchi++ ${name}`);
 });
 
-bot.hears("🎁 Referal", (ctx) => ctx.reply("🔥Tez kunda..."));
+bot.hears("🎁 Referal", async (ctx) => {
+  const userId = String(ctx.from.id);
+
+  if (!userData[userId]) {
+    userData[userId] = { balance: 0, referrals: 0, referredBy: null };
+  }
+
+  const balance = userData[userId].balance;
+  const referrals = userData[userId].referrals;
+  const link = `t.me/${ctx.botInfo.username}?start=${userId}`;
+
+  await ctx.reply(
+    `👤 Sizning referal havolangiz:\n${link}\n\n💰 Balansingiz: ${balance}\n🤝 Takliflar soni: ${referrals}`,
+    Markup.inlineKeyboard([
+      [
+        Markup.button.url(
+          "🚀 Ulashish",
+          `https://t.me/share/url?url=${encodeURIComponent(
+            link
+          )}&text=${encodeURIComponent("👋 Salom! Bu mening referal linkim:")}`
+        ),
+      ],
+    ])
+  );
+});
+
+bot.action("go_back_main", async (ctx) => {
+  await ctx.answerCbQuery();
+  await ctx.reply("Bosh menyuga qaytdingiz ✅", mainKeyboard);
+});
 
 bot.hears("🎬 Buyurtma qilish", async (ctx) => {
   waitOrder[ctx.from.id] = true;
@@ -54,9 +157,7 @@ bot.on("text", async (ctx) => {
       delete userLast[id].specialMsg;
     }
 
-    await ctx.reply("⏳", {
-      reply_markup: { remove_keyboard: true },
-    });
+    await ctx.reply("⏳", { reply_markup: { remove_keyboard: true } });
 
     await ctx.telegram.sendMessage(
       ADMIN,
