@@ -132,24 +132,20 @@ bot.hears("🎬 Buyurtma qilish", async (ctx) => {
 
   const VIDEO_MESSAGE_ID = 54;
 
-  try {
-    const msg = await ctx.telegram.copyMessage(
-      ctx.from.id,
-      CHANNEL,
-      VIDEO_MESSAGE_ID,
-      {
-        caption:
-          "𝗤𝗼'𝗹𝗹𝗮𝗻𝗺𝗮 𝘃𝗶𝗱𝗲𝗼𝘀𝗶❕\n\n𝗜𝗹𝘁𝗶𝗺𝗼𝘀, 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴.\n\n𝗞𝗮𝗻𝗮𝗹: t.me/movely_studios\n\nYangi film nomini yozib qoldirishingiz mumkin!👇",
-        reply_markup: Markup.inlineKeyboard([
-          [Markup.button.callback("🔙 Ortga qaytish", "go_back")],
-        ]),
-      }
-    );
-    userLast[ctx.from.id] = { specialMsg: msg.message_id };
-  } catch (e) {
-    console.error("Video jo'natishda xatolik:", e);
-    await ctx.reply("Video jo'natishda muammo yuz berdi.");
-  }
+  const msg = await ctx.telegram.copyMessage(
+    ctx.from.id,
+    CHANNEL,
+    VIDEO_MESSAGE_ID,
+    {
+      caption:
+        "𝗤𝗼'𝗹𝗹𝗮𝗻𝗺𝗮 𝘃𝗶𝗱𝗲𝗼𝘀𝗶❕\n\n𝗜𝗹𝘁𝗶𝗺𝗼𝘀, 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴.\n\n𝗞𝗮𝗻𝗮𝗹: t.me/movely_studios\n\nYangi film nomini yozib qoldirishingiz mumkin!👇",
+      reply_markup: Markup.inlineKeyboard([
+        [Markup.button.callback("🔙 Ortga qaytish", "go_back")],
+      ]),
+    }
+  );
+
+  userLast[ctx.from.id] = { specialMsg: msg.message_id };
 });
 
 bot.on("text", async (ctx) => {
@@ -223,12 +219,14 @@ bot.action("cancel_order", async (ctx) => {
 
 bot.action("go_back", async (ctx) => {
   delete waitOrder[ctx.from.id];
+
   if (userLast[ctx.from.id]?.specialMsg) {
     await ctx.telegram
       .deleteMessage(ctx.from.id, userLast[ctx.from.id].specialMsg)
       .catch(() => {});
     delete userLast[ctx.from.id].specialMsg;
   }
+
   await ctx.answerCbQuery();
   await ctx.reply("Bosh menuga qaytdingiz ✅", mainKeyboard);
 });
