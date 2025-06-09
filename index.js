@@ -129,13 +129,21 @@ bot.action("go_back_main", async (ctx) => {
 
 bot.hears("🎬 Buyurtma qilish", async (ctx) => {
   waitOrder[ctx.from.id] = true;
-  const msg = await ctx.reply(
-    "❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀, 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴. \n\n📝 Yangi film nomini yozib qoldirishingiz mumkin!",
-    Markup.inlineKeyboard([
-      [Markup.button.callback("🔙 Ortga qaytish", "go_back")],
-    ])
-  );
-  userLast[ctx.from.id] = { specialMsg: msg.message_id };
+
+  await ctx
+    .replyWithVideo(
+      { source: "./qollanma.mp4" },
+      {
+        caption:
+          "❕𝗜𝗹𝘁𝗶𝗺𝗼𝘀, 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴. \n\n📝 Yangi film nomini yozib qoldirishingiz mumkin!",
+        reply_markup: Markup.inlineKeyboard([
+          [Markup.button.callback("🔙 Ortga qaytish", "go_back")],
+        ]),
+      }
+    )
+    .then((msg) => {
+      userLast[ctx.from.id] = { specialMsg: msg.message_id };
+    });
 });
 
 bot.on("text", async (ctx) => {
