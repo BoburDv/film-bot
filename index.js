@@ -108,7 +108,7 @@ bot.hears("🎁 Referal", async (ctx) => {
   const link = `t.me/${ctx.botInfo.username}?start=${userId}`;
 
   await ctx.reply(
-    `👤 Sizning referal havolangiz:\n${link}\n\n💰 Balansingiz: ${balance}\n🤝 Takliflar soni: ${referrals}`,
+    `👤 Sizning referal havolangiz:\n${link}\n\n💰 Balansingiz: ${balance}\n🤝 Takliflar soni: ${referrals}\n\n𝗫𝗮𝗹𝗶 𝘀𝗶𝗻𝗼𝘃 𝗿𝗲𝗷𝗶𝗺𝗶𝗱𝗮!`,
     Markup.inlineKeyboard([
       [
         Markup.button.url(
