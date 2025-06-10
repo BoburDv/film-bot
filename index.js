@@ -138,7 +138,7 @@ bot.hears("🎬 Buyurtma qilish", async (ctx) => {
     VIDEO_MESSAGE_ID,
     {
       caption:
-        "𝗤𝗼'𝗹𝗹𝗮𝗻𝗺𝗮 𝘃𝗶𝗱𝗲𝗼𝘀𝗶❕\n\n𝗜𝗹𝘁𝗶𝗺𝗼𝘀, 𝗮𝘃𝘃𝗮𝗹 𝘀𝗶𝘇 𝗶𝘇𝗹𝗮𝗴𝗮𝗻 𝗳𝗶𝗹𝗺 𝗯𝗶𝘇𝗱𝗮 𝗯𝗼𝗿 𝘆𝗼𝗸𝗶 𝘆𝗼'𝗾𝗹𝗶𝗴𝗶𝗻𝗶 𝘁𝗲𝗸𝘀𝗵𝗶𝗿𝗶𝗻𝗴. \n\n𝗞𝗮𝗻𝗮𝗹: t.me/movely_studios \n\nYangi film nomini yozib qoldirishingiz mumkin!👇",
+        "𝗤𝗼'𝗹𝗹𝗮𝗻𝗺𝗮 𝘃𝗶𝗱𝗲𝗼𝘀𝗶❕\n\nTelegram kanal: @movely_studios \n\nYangi film nomini yozib qoldirishingiz mumkin!",
       reply_markup: Markup.inlineKeyboard([
         [Markup.button.callback("🔙 Ortga qaytish", "go_back")],
       ]),
