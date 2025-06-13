@@ -128,24 +128,21 @@ bot.action("go_back_main", async (ctx) => {
 });
 
 bot.hears("🎬 Buyurtma qilish", async (ctx) => {
-  waitOrder[ctx.from.id] = true;
+  const userId = ctx.from.id;
+  waitOrder[userId] = true;
 
-  const VIDEO_MESSAGE_ID = 54;
-
-  const msg = await ctx.telegram.copyMessage(
-    ctx.from.id,
-    CHANNEL,
-    VIDEO_MESSAGE_ID,
+  const msg = await ctx.replyWithVideo(
+    { source: "./qollanma.mp4" },
     {
       caption:
         "𝗤𝗼'𝗹𝗹𝗮𝗻𝗺𝗮 𝘃𝗶𝗱𝗲𝗼𝘀𝗶❕\n\nTelegram kanal: @movely_studios \n\nYangi film nomini yozib qoldirishingiz mumkin!",
       reply_markup: Markup.inlineKeyboard([
         [Markup.button.callback("🔙 Ortga qaytish", "go_back")],
-      ]),
+      ]).reply_markup,
     }
   );
 
-  userLast[ctx.from.id] = { specialMsg: msg.message_id };
+  userLast[userId] = { specialMsg: msg.message_id };
 });
 
 bot.on("text", async (ctx) => {
