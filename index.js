@@ -2,6 +2,7 @@ require("dotenv").config();
 const fs = require("fs");
 const { Telegraf, Markup } = require("telegraf");
 const films = require("./data-movie");
+const pendingReplies = {};
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMIN = 7676273635,
@@ -171,7 +172,10 @@ bot.on("text", async (ctx) => {
 
     await ctx.telegram.sendMessage(
       ADMIN,
-      `📥 Buyurtma: ${text}\n\n👤 User: ${user}`
+      `📥 Buyurtma: ${text}\n\n👤 User: ${user}`,
+      Markup.inlineKeyboard([
+        [Markup.button.callback("📩 Javob yozish", `reply_${ctx.from.id}`)],
+      ])
     );
 
     await ctx.reply(
@@ -213,7 +217,7 @@ bot.on("text", async (ctx) => {
 bot.action("cancel_order", async (ctx) => {
   const user = ctx.from.username
     ? `@${ctx.from.username}`
-    : `${ctx.from.first_name} (${ctx.from.id})`;
+    : `${ctx.from.first_name}`;
 
   delete waitOrder[ctx.from.id];
 
@@ -221,8 +225,18 @@ bot.action("cancel_order", async (ctx) => {
   await ctx.reply("Buyurtma bekor qilindi ✅", mainKeyboard);
 
   // Adminga xabar yuboriladi:
-  await ctx.telegram.sendMessage(ADMIN, `${user} buyurtmani bekor qildi`);
+  await ctx.telegram.sendMessage(ADMIN, `${user} buyurtmani bekor qildi.`);
 
+  await ctx.answerCbQuery();
+});
+
+bot.action(/^reply_(\d+)$/, async (ctx) => {
+  const userId = ctx.match[1];
+  pendingReplies[ctx.from.id] = userId;
+
+  await ctx.reply(
+    "✍️ Endi foydalanuvchiga yuboriladigan har qanday xabarni yozing yoki yuboring."
+  );
   await ctx.answerCbQuery();
 });
 
@@ -352,5 +366,50 @@ function generateButtons(f, parts, page = 1, current = null) {
 
   return Markup.inlineKeyboard([finalRow]).reply_markup;
 }
+// Kodga quyidagi qismini, ya'ni oxiriga (bot.launch() dan oldin) qo'shamiz:
+
+bot.on("message", async (ctx) => {
+  const adminId = ctx.from.id;
+
+  // Faqat admin xabar yuborsa va javob kutilayotgan bo‘lsa
+  if (pendingReplies[adminId]) {
+    const targetUserId = pendingReplies[adminId];
+
+    try {
+      const msg = ctx.message;
+
+      if (msg.text) {
+        await ctx.telegram.sendMessage(targetUserId, msg.text);
+      } else if (msg.photo) {
+        await ctx.telegram.sendPhoto(
+          targetUserId,
+          msg.photo[msg.photo.length - 1].file_id,
+          { caption: msg.caption || undefined }
+        );
+      } else if (msg.video) {
+        await ctx.telegram.sendVideo(targetUserId, msg.video.file_id, {
+          caption: msg.caption || undefined,
+        });
+      } else if (msg.document) {
+        await ctx.telegram.sendDocument(targetUserId, msg.document.file_id, {
+          caption: msg.caption || undefined,
+        });
+      } else {
+        await ctx.telegram.sendMessage(
+          adminId,
+          "❗️ Ushbu turdagi xabarni foydalanuvchiga yubora olmadim."
+        );
+      }
+
+      await ctx.telegram.sendMessage(adminId, "✅ Javob yuborildi.");
+      delete pendingReplies[adminId];
+    } catch (e) {
+      await ctx.telegram.sendMessage(
+        adminId,
+        `❌ Xatolik yuz berdi: ${e.message}`
+      );
+    }
+  }
+});
 
 bot.launch();
