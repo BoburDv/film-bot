@@ -155,7 +155,7 @@ bot.on("text", async (ctx) => {
 
     const user = ctx.from.username
       ? `@${ctx.from.username}`
-      : ctx.from.first_name;
+      : `${ctx.from.first_name} (${ctx.from.id})`;
 
     if (userLast[id]?.specialMsg) {
       await ctx.telegram
@@ -164,7 +164,10 @@ bot.on("text", async (ctx) => {
       delete userLast[id].specialMsg;
     }
 
-    await ctx.reply("⏳", { reply_markup: { remove_keyboard: true } });
+    // Optional: xabar yuborilmoqda (⏳ yo‘q)
+    await ctx.reply("Buyurtma yuborilmoqda...", {
+      reply_markup: { remove_keyboard: true },
+    });
 
     await ctx.telegram.sendMessage(
       ADMIN,
