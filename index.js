@@ -234,9 +234,7 @@ bot.action(/^reply_(\d+)$/, async (ctx) => {
   const userId = ctx.match[1];
   pendingReplies[ctx.from.id] = userId;
 
-  await ctx.reply(
-    "✍️ Endi foydalanuvchiga yuboriladigan har qanday xabarni yozing yoki yuboring."
-  );
+  await ctx.reply("Marhamat, foydalanuvchiga xabar yuboring.");
   await ctx.answerCbQuery();
 });
 
@@ -397,7 +395,7 @@ bot.on("message", async (ctx) => {
       } else {
         await ctx.telegram.sendMessage(
           adminId,
-          "❗️ Ushbu turdagi xabarni foydalanuvchiga yubora olmadim."
+          "❗️ Kechirasiz, foydalanuvchiga yubora olmadim."
         );
       }
 
