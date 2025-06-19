@@ -288,29 +288,33 @@ function generateButtons(f, parts, page = 1, current = null) {
     const currentIndex = parts.indexOf(String(current));
     const buttons = [];
 
-    const prev1 = parts[currentIndex - 1];
-    const prev2 = parts[currentIndex - 2];
-    const next1 = parts[currentIndex + 1];
-    const next2 = parts[currentIndex + 2];
+    // Oldingi va keyingi qismlar
+    const prev = parts[currentIndex - 1];
+    const next = parts[currentIndex + 1];
 
-    // Har doim kamida 2 ta tugma chiqarish uchun
-    if (prev2 && !prev1 && next1) {
-      buttons.push(Markup.button.callback(`${next1}-qism`, `${f}_${next1}`));
-      buttons.push(Markup.button.callback(`${next2}-qism`, `${f}_${next2}`));
-    } else if (next2 && !next1 && prev1) {
-      buttons.push(Markup.button.callback(`${prev2}-qism`, `${f}_${prev2}`));
-      buttons.push(Markup.button.callback(`${prev1}-qism`, `${f}_${prev1}`));
-    } else {
-      if (prev1)
-        buttons.push(Markup.button.callback(`${prev1}-qism`, `${f}_${prev1}`));
-      if (next1)
-        buttons.push(Markup.button.callback(`${next1}-qism`, `${f}_${next1}`));
+    if (prev)
+      buttons.push(Markup.button.callback(`${prev}-qism`, `${f}_${prev}`));
+    if (next)
+      buttons.push(Markup.button.callback(`${next}-qism`, `${f}_${next}`));
+
+    // Agar faqat bitta tugma chiqayotgan bo‘lsa → qo‘shni keyingi yoki oldingidan yana bitta qo‘shamiz
+    if (buttons.length === 1) {
+      const prev2 = parts[currentIndex - 2];
+      const next2 = parts[currentIndex + 2];
+
+      if (!prev && next2) {
+        buttons.push(Markup.button.callback(`${next2}-qism`, `${f}_${next2}`));
+      } else if (!next && prev2) {
+        buttons.unshift(
+          Markup.button.callback(`${prev2}-qism`, `${f}_${prev2}`)
+        );
+      }
     }
 
     return Markup.inlineKeyboard([buttons]).reply_markup;
   }
 
-  // Eski paginatsiya qoladi (menyudan ko‘rsa)
+  // Menyudan ko‘rayotgandagi eski paginatsiya
   const perPage = page === 1 || page === Math.ceil(total / 2) ? 3 : 2;
   const startIndex = page === 1 ? 0 : (page - 2) * 2 + 3;
   const endIndex = Math.min(startIndex + perPage, total);
