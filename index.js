@@ -165,8 +165,7 @@ bot.on("text", async (ctx) => {
       delete userLast[id].specialMsg;
     }
 
-    // Optional: xabar yuborilmoqda (⏳ yo‘q)
-    await ctx.reply("Buyurtma yuborilmoqda...", {
+    await ctx.reply("✅", {
       reply_markup: { remove_keyboard: true },
     });
 
@@ -179,7 +178,7 @@ bot.on("text", async (ctx) => {
     );
 
     await ctx.reply(
-      "Buyurtma qabul qilindi ✅",
+      "Buyurtma qabul qilindi. Tez orada javob qaytariladi. Iltimos, kuting...",
       Markup.inlineKeyboard([
         [Markup.button.callback("❌ Bekor qilish", "cancel_order")],
       ])
