@@ -284,15 +284,41 @@ function generateButtons(f, parts, page = 1, current = null) {
   const total = parts.length;
   if (total <= 1) return undefined;
 
+  if (current) {
+    const currentIndex = parts.indexOf(String(current));
+    const buttons = [];
+
+    const prev1 = parts[currentIndex - 1];
+    const prev2 = parts[currentIndex - 2];
+    const next1 = parts[currentIndex + 1];
+    const next2 = parts[currentIndex + 2];
+
+    // Har doim kamida 2 ta tugma chiqarish uchun
+    if (prev2 && !prev1 && next1) {
+      buttons.push(Markup.button.callback(`${next1}-qism`, `${f}_${next1}`));
+      buttons.push(Markup.button.callback(`${next2}-qism`, `${f}_${next2}`));
+    } else if (next2 && !next1 && prev1) {
+      buttons.push(Markup.button.callback(`${prev2}-qism`, `${f}_${prev2}`));
+      buttons.push(Markup.button.callback(`${prev1}-qism`, `${f}_${prev1}`));
+    } else {
+      if (prev1)
+        buttons.push(Markup.button.callback(`${prev1}-qism`, `${f}_${prev1}`));
+      if (next1)
+        buttons.push(Markup.button.callback(`${next1}-qism`, `${f}_${next1}`));
+    }
+
+    return Markup.inlineKeyboard([buttons]).reply_markup;
+  }
+
+  // Eski paginatsiya qoladi (menyudan ko‘rsa)
   const perPage = page === 1 || page === Math.ceil(total / 2) ? 3 : 2;
   const startIndex = page === 1 ? 0 : (page - 2) * 2 + 3;
   const endIndex = Math.min(startIndex + perPage, total);
   const sliced = parts.slice(startIndex, endIndex);
 
-  // ❗️Agar current qism berilgan bo‘lsa, uni tugmadan chiqarib tashlaymiz
-  const row = sliced
-    .filter((x) => x !== String(current))
-    .map((x) => Markup.button.callback(`${x}-qism`, `${f}_${x}`));
+  const row = sliced.map((x) =>
+    Markup.button.callback(`${x}-qism`, `${f}_${x}`)
+  );
 
   const nav = [];
   if (page > 1) nav.push(Markup.button.callback("◀️", `nav_${f}_${page - 1}`));
