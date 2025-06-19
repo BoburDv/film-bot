@@ -211,9 +211,18 @@ bot.on("text", async (ctx) => {
 });
 
 bot.action("cancel_order", async (ctx) => {
+  const user = ctx.from.username
+    ? `@${ctx.from.username}`
+    : `${ctx.from.first_name} (${ctx.from.id})`;
+
   delete waitOrder[ctx.from.id];
+
   await ctx.deleteMessage().catch(() => {});
   await ctx.reply("Buyurtma bekor qilindi ✅", mainKeyboard);
+
+  // Adminga xabar yuboriladi:
+  await ctx.telegram.sendMessage(ADMIN, `${user} buyurtmani bekor qildi`);
+
   await ctx.answerCbQuery();
 });
 
