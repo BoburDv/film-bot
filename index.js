@@ -280,10 +280,28 @@ async function sendFilm(ctx, f, p, page = 1) {
   }
 }
 
-function generateButtons(f, parts, page = 1) {
+function generateButtons(f, parts, page = 1, current = null) {
   const total = parts.length;
-  const perPage = page === 1 || page === Math.ceil(total / 2) ? 3 : 2;
+  if (total <= 1) return undefined;
 
+  // Agar hozirgi qism berilgan bo‘lsa (current), atrofidagi qismlarni chiqaramiz
+  if (current) {
+    const currentIndex = parts.indexOf(String(current));
+    const buttons = [];
+
+    const prev = parts[currentIndex - 1];
+    const next = parts[currentIndex + 1];
+
+    if (prev)
+      buttons.push(Markup.button.callback(`${prev}-qism`, `${f}_${prev}`));
+    if (next)
+      buttons.push(Markup.button.callback(`${next}-qism`, `${f}_${next}`));
+
+    return Markup.inlineKeyboard([buttons]).reply_markup;
+  }
+
+  // Agar current yo‘q bo‘lsa (ya'ni foydalanuvchi menyudan ko‘rayotgan bo‘lsa), eski paginatsiya ishlaydi
+  const perPage = page === 1 || page === Math.ceil(total / 2) ? 3 : 2;
   const startIndex = page === 1 ? 0 : (page - 2) * 2 + 3;
   const endIndex = Math.min(startIndex + perPage, total);
   const sliced = parts.slice(startIndex, endIndex);
