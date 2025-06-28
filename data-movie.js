@@ -9,24 +9,17 @@ const films = {
     7: 28,
     8: 29,
   },
-  Asalarich: {
-    1: 30,
-  },
+
   OrgimchaOdam: {
     1: 32,
     2: 31,
   },
-  Godzilla: {
-    1: 33,
-  },
-  Sonik: {
-    1: 36,
-  },
-  Maynkraft: {
-    1: 39
-  },
-  Qasoskorlar: {
-    1: 45
+
+  KalmarOyini: {
+    1: 60,
+    2: 57,
+    3: 59,
+    4: 58,
   },
 };
 
