@@ -87,10 +87,7 @@ async function sendFilm(ctx, f, p, page = 1) {
 
   try {
     const parts = Object.keys(require("../data-movie")[f]);
-    const reply_markup =
-      parts.length > 1
-        ? require("./actions").generateButtons(f, parts, page, p)
-        : undefined;
+    const reply_markup = undefined;
 
     const isPartButton = /^\w+_\d+$/.test(ctx.callbackQuery?.data || "");
     if (isPartButton && userLast[id]?.msg) {

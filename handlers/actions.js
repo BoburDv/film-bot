@@ -39,7 +39,7 @@ function handleActions(bot) {
     const [_, f, page] = ctx.match;
     const id = ctx.from.id;
     const parts = Object.keys(films[f]);
-    const reply_markup = generateButtons(f, parts, +page);
+    const reply_markup = undefined;
 
     if (userLast[id]?.msg) {
       await ctx.telegram
@@ -100,30 +100,7 @@ function generateButtons(f, parts, page = 1, current = null) {
     return Markup.inlineKeyboard([buttons]).reply_markup;
   }
 
-  const perPage = page === 1 || page === Math.ceil(total / 2) ? 3 : 2;
-  const startIndex = page === 1 ? 0 : (page - 2) * 2 + 3;
-  const endIndex = Math.min(startIndex + perPage, total);
-  const sliced = parts.slice(startIndex, endIndex);
-
-  const row = sliced.map((x) =>
-    Markup.button.callback(`${x}-qism`, `${f}_${x}`)
-  );
-
-  const nav = [];
-  if (page > 1) nav.push(Markup.button.callback("◀️", `nav_${f}_${page - 1}`));
-  if (endIndex < total)
-    nav.push(Markup.button.callback("▶️", `nav_${f}_${page + 1}`));
-
-  const finalRow =
-    nav.length === 2
-      ? [nav[0], ...row, nav[1]]
-      : nav.length === 1
-      ? page === 1
-        ? [...row, nav[0]]
-        : [nav[0], ...row]
-      : row;
-
-  return Markup.inlineKeyboard([finalRow]).reply_markup;
+  return undefined;
 }
 
 module.exports = handleActions;
